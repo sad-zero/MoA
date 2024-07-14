@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Annotated, List, TypedDict
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain.schema import HumanMessage, SystemMessage
 from langchain_core.messages import AnyMessage
 from langgraph.constants import END, START
 from langgraph.graph import MessagesState, StateGraph, add_messages
@@ -10,9 +10,11 @@ from langchain_community.chat_models.ollama import ChatOllama
 
 LAYER_WIDTH, GRAPH_DEPTH = 3, 1
 
+
 class GraphState(TypedDict):
     messages: Annotated[List[AnyMessage], add_messages]
     depth: int
+
 
 async def aggregate_and_synthesize(state: GraphState):
     """
@@ -38,6 +40,7 @@ Responses from models:
     ]
     return {"messages": messages}
 
+
 async def depth_checker(state: GraphState):
     """
     Determine whether the process ends.
@@ -46,12 +49,14 @@ async def depth_checker(state: GraphState):
         return "aggregator"
     else:
         return "entry"
-    
+
+
 async def entry(state: GraphState):
     """
     Add graph depth
     """
     return {"depth": state["depth"] + 1}
+
 
 async def proposer1(state: GraphState):
     system_template = ChatPromptTemplate.from_messages(
@@ -95,6 +100,7 @@ async def proposer3(state: GraphState):
     response = model.invoke({"messages": input_})
     return {"messages": response}
 
+
 async def aggregator(state: GraphState):
     system_template = ChatPromptTemplate.from_messages(
         [
@@ -127,7 +133,7 @@ async def main():
     for proposer in proposers.keys():
         graph_builder.add_edge("entry", proposer)
         graph_builder.add_edge(proposer, "asp_node")
-    
+
     graph_builder.add_conditional_edges("asp_node", depth_checker)
     graph_builder.add_edge("aggregator", END)
     graph = graph_builder.compile()
