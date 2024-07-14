@@ -3,17 +3,30 @@ import logging
 from langchain.schema import HumanMessage
 from langchain_core.runnables import Runnable
 from mesop_langgraph.graph import GraphState, get_graph
+import mesop as me
+import mesop.labs as mel
 
-
+logging.basicConfig(level=logging.DEBUG)
 graph: Runnable = get_graph()
 
 
-if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+
+
+@me.page(
+  security_policy=me.SecurityPolicy(
+    allowed_iframe_parents=["https://google.github.io"]
+  ),
+  path="/chat",
+  title="Mesop Demo Chat",
+)
+def page():
+  mel.chat(transform, title="Mesop Demo Chat", bot_user="Mesop Bot")
+
+
+def transform(input: str, history: list[mel.ChatMessage]):
     messages = [
-        HumanMessage(content="How do I teach programming more funny?"),
+        HumanMessage(content=input),
     ]
     state: GraphState = {"depth": 0, "messages": messages}
-    res: GraphState = asyncio.run(graph.ainvoke(state, debug=True))
-    answer = res["messages"][-1].content
-    logging.info(f"Answer: {answer}")
+    response: GraphState = asyncio.run(graph.ainvoke(state, debug=True))
+    yield response["messages"][-1].content

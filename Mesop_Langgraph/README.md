@@ -9,6 +9,8 @@
 3. Run `poetry shell` to use venv
 
 ## Run demo
+1. `mesop src/mesop_langgraph/main.py`
+2. Chat!
 
 
 ## Design
