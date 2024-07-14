@@ -10,17 +10,15 @@ logging.basicConfig(level=logging.DEBUG)
 graph: Runnable = get_graph()
 
 
-
-
 @me.page(
-  security_policy=me.SecurityPolicy(
-    allowed_iframe_parents=["https://google.github.io"]
-  ),
-  path="/chat",
-  title="Mesop Demo Chat",
+    security_policy=me.SecurityPolicy(
+        allowed_iframe_parents=["https://google.github.io"]
+    ),
+    path="/chat",
+    title="Mesop Demo Chat",
 )
 def page():
-  mel.chat(transform, title="Mesop Demo Chat", bot_user="Mesop Bot")
+    mel.chat(transform, title="Mesop Demo Chat", bot_user="Mesop Bot")
 
 
 def transform(input: str, history: list[mel.ChatMessage]):
