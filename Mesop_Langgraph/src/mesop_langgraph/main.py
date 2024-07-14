@@ -27,4 +27,7 @@ def transform(input: str, history: list[mel.ChatMessage]):
     ]
     state: GraphState = {"depth": 0, "messages": messages}
     response: GraphState = asyncio.run(graph.ainvoke(state, debug=True))
-    yield response["messages"][-1].content
+    for intermediate_output in response["intermediate_outputs"]:
+        for model, output in intermediate_output.items():
+            yield f"{model}: {output}\n\n"
+    yield f"Final Response: {response['messages'][-1].content}"

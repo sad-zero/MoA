@@ -1,6 +1,6 @@
-from typing import Annotated, List, TypedDict
+from typing import Annotated, Dict, List, TypedDict
 from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import HumanMessage, SystemMessage
+from langchain.schema import AIMessage, HumanMessage, SystemMessage
 from langchain_core.messages import AnyMessage
 from langgraph.constants import END, START
 from langgraph.graph import StateGraph, add_messages
@@ -8,9 +8,16 @@ from langchain_community.chat_models.ollama import ChatOllama
 
 LAYER_WIDTH, GRAPH_DEPTH = 3, 1
 
+def add_outputs(origin: List[Dict[str, AIMessage]], added: Dict[str, AIMessage]) -> List[Dict[str, AIMessage]]:
+    """
+    Save intermediate outputs
+    """
+    result = origin + [added]
+    return result
 
 class GraphState(TypedDict):
     messages: Annotated[List[AnyMessage], add_messages]
+    intermediate_outputs: Annotated[List[Dict[str, AIMessage]], add_outputs]
     depth: int
 
 
@@ -20,6 +27,7 @@ async def aggregate_and_synthesize(state: GraphState):
     Proposers and Aggregator use this prompt via state["messages"][-2:]
     """
     responses = state["messages"][-LAYER_WIDTH:]
+    intermediate_outputs = {}
     human_query = state["messages"][0].content
     aggregate_and_synthesize_prompt = """
 You have been provided with a set of responses from various open-source models to the latest user query. Your
@@ -32,11 +40,13 @@ Responses from models:
 """
     for idx, response in enumerate(responses):
         aggregate_and_synthesize_prompt += f"{idx+1}: {response.content}\n"
+        intermediate_outputs[response.response_metadata["model"]] = response.content
     messages = [
         SystemMessage(content=aggregate_and_synthesize_prompt),
         HumanMessage(content=human_query),
     ]
-    return {"messages": messages}
+
+    return {"messages": messages, "intermediate_outputs": intermediate_outputs}
 
 
 async def depth_checker(state: GraphState):
