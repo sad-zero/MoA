@@ -6,14 +6,18 @@ from langgraph.constants import END, START
 from langgraph.graph import StateGraph, add_messages
 from langchain_community.chat_models.ollama import ChatOllama
 
-LAYER_WIDTH, GRAPH_DEPTH = 3, 1
+LAYER_WIDTH, GRAPH_DEPTH = 3, 2
 
-def add_outputs(origin: List[Dict[str, AIMessage]], added: Dict[str, AIMessage]) -> List[Dict[str, AIMessage]]:
+
+def add_outputs(
+    origin: List[Dict[str, AIMessage]], added: Dict[str, AIMessage]
+) -> List[Dict[str, AIMessage]]:
     """
     Save intermediate outputs
     """
     result = origin + [added]
     return result
+
 
 class GraphState(TypedDict):
     messages: Annotated[List[AnyMessage], add_messages]

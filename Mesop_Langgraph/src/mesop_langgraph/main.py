@@ -15,10 +15,10 @@ graph: Runnable = get_graph()
         allowed_iframe_parents=["https://google.github.io"]
     ),
     path="/chat",
-    title="Mesop Demo Chat",
+    title="Mixture Of Agents Chat",
 )
 def page():
-    mel.chat(transform, title="Mesop Demo Chat", bot_user="Mesop Bot")
+    mel.chat(transform, title="Demo Chat", bot_user="MoA Bot")
 
 
 def transform(input: str, history: list[mel.ChatMessage]):
@@ -27,7 +27,9 @@ def transform(input: str, history: list[mel.ChatMessage]):
     ]
     state: GraphState = {"depth": 0, "messages": messages}
     response: GraphState = asyncio.run(graph.ainvoke(state, debug=True))
-    for intermediate_output in response["intermediate_outputs"]:
+    for layer, intermediate_output in enumerate(response["intermediate_outputs"]):
+        yield "=" * 5 + f"Layer[{layer}]" + "=" * 5 + "\n\n"
         for model, output in intermediate_output.items():
             yield f"{model}: {output}\n\n"
-    yield f"Final Response: {response['messages'][-1].content}"
+    yield "=" * 5 + "Final Response" + "=" * 5 + "\n\n"
+    yield response["messages"][-1].content

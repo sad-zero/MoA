@@ -4,30 +4,35 @@
 - Demonstrate MoA Chatbot with Mesop
 
 ## Installation
+### Python
 1. Install [poetry](https://python-poetry.org/docs/#installation)
 2. Run `poetry install` in this directory.
 3. Run `poetry shell` to use venv
+### Ollama
+1. [Install ollama](https://ollama.com/download)
+2. Install below models(proposers, aggregator)
 
 ## Run demo
 1. `mesop src/mesop_langgraph/main.py`
-2. Chat!
+2. `Open /chat`
+3. Chat!
 
 
 ## Design
 ### MoA Architecture
 ```mermaid
 flowchart LR
-    question --> proposers1 & proposer2 & proposer3 --> aggregator --> answer
+    question --> proposer1_1 & proposer1_2 & proposer1_3 --> aggregate_and_synthesize1 --> proposer2_1 & proposer2_2 & proposer2_3 --> aggregate_and_synthesize2 --> aggregator --> answer
 ```
-- Proposer Layer: 1
+- Proposer Layer: 2
 - Aggregator Layer: 1
 ### LLMs
 #### Proposers
-- [qwen2:7b-instruct](https://ollama.com/library/qwen2:7b-instruct)
+- [gemma:2b-instruct](https://ollama.com/library/gemma:2b-instruct)
     - temperature: 0.2
-- [mistral:7b-instruct](https://ollama.com/library/mistral:instruct)
+- [qwen2:1.5b-instruct-fp16](https://ollama.com/library/qwen2:1.5b-instruct-fp16)
     - temperature: 0.2
-- [llama3:8b-instruct](https://ollama.com/library/llama3:instruct)
+- [phi3:3.8b-instruct](https://ollama.com/library/phi3:3.8b-instruct)
     - temperature: 0.2
 #### Aggregator
 - [qwen2:7b-instruct](https://ollama.com/library/qwen2:7b-instruct)
